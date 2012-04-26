@@ -1,0 +1,21 @@
+{
+  "name": "parasite",
+  "description": "Realtime site tools",
+  "keywords": [ "javascript", "language", "nodejs", "stats", "monitoring" ],
+  "author": "Jeff Su, Chris Bleakley",
+  "version": "0.0.1",
+  "licenses": [ { "type": "MIT" }],
+  "engines": { "node": ">=0.4.0" },
+  "directories": { "lib": "./lib/parasite" },
+  "main" : "./lib/parasite/index",
+  "bin": {},
+  "dependencies": { 
+    "mochiscript": ">=0.5.3",
+    "tempo": ""
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jeffsu/parasite.git"
+  }
+}
