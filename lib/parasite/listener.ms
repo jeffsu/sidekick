@@ -6,28 +6,19 @@ export class Listener {
   }
 
   function initialize() {
-    this.connectionCount = 0;
     this.listeners = {};
   }
 
-  function increment() {
-    this.connectionCount++;
-  }
-  
-  function decrement() {
-    this.connectionCount--;
-  }
-
-  function attach(req) {
+  function attach(req, cb) {
     var id = this.randId();
-    req.on('end', #{ delete self.listeners[id];  });
-    this.listeners[id] = req;
+    req.on('close', #{ console.log('deleting' + id + req.url); delete self.listeners[id];  });
+    this.listeners[id] = cb;
   }
 
   function handle(req, res, next) {
     for (var key in this.listeners) {
       var listener = this.listeners[key];
-      listener.suck(req, res);
+      listener(req, res);
     }
 
     next();

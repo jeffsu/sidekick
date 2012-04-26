@@ -17,10 +17,11 @@ export class Middleware {
   }
 
   function parasiteApp() {
-    if (this.app) return app;
-    this.app = connect.createServer();
-    app.use(#{ self.server.handle($1, $2, $3) });
-    return app;
+    if (!this.app) {
+      this.app = connect.createServer();
+      this.app.use(#{ self.server.handle($1, $2, $3) });
+    }
+    return this.app;
   }
 
   function listen(port) {

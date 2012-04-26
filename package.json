@@ -11,7 +11,8 @@
   "bin": {},
   "dependencies": { 
     "mochiscript": ">=0.5.3",
-    "tempo": ""
+    "tempo": "",
+    "connect": ""
   },
 
   "repository": {
