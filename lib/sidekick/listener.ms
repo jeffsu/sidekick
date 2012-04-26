@@ -7,21 +7,65 @@ export class Listener {
 
   function initialize() {
     this.listeners = {};
+    this.afters    = {};
+    this.afterCount = 0;
   }
 
   function attach(req, cb) {
     var id = this.randId();
-    req.on('close', #{ console.log('deleting' + id + req.url); delete self.listeners[id];  });
+    this.emit('add', id);
+
+    req.on('close', #{ 
+      delete self.listeners[id];  
+      self.emit('delete', id);
+    });
+
     this.listeners[id] = cb;
   }
 
-  function handle(req, res, next) {
+  function attachAfter(req, cb) {
+    var id = this.randId();
+    this.afterCount++;
+    this.emit('add', id);
+
+    req.on('close', #{ 
+      delete self.listeners[id];  
+      self.emit('delete', id);
+      self.afterCount--;
+    });
+
+    this.afters[id] = cb;
+  }
+
+  function handle(req, res) {
     for (var key in this.listeners) {
       var listener = this.listeners[key];
-      listener(req, res);
+      try {
+        listener(req, res);
+      } catch(e) {
+        console.log(e); 
+      }
     }
+  }
 
-    next();
+  function handleAfters(req, res, meta) {
+    for (var key in this.afters) {
+      var listener = this.afters[key];
+      try {
+        listener(req, res, meta);
+      } catch(e) {
+        console.log(e); 
+      }
+    }
+  }
+
+  function handleAfter(req, res) {
+    var start = new Date();
+    var meta  = {};
+    res.on('header', #{
+      meta.responseTime = new Date() - start;
+      self.handleAfters(req, res, meta);
+    });
   }
 
   function randId() {

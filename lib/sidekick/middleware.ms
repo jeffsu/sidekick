@@ -12,14 +12,18 @@ export class Middleware {
 
   function connect() {
     return #(req, res, next) {
-      self.listener.handle(req, res, next);
+      if (self.listener.afterCount) self.listener.handleAfter(req, res);
+      self.listener.handle(req, res);
+      next();
     };
   }
 
   function getApp() {
     if (!this.app) {
       this.app = connect.createServer();
-      this.app.use(#{ self.server.handle($1, $2, $3) });
+      this.app.use(#{ 
+        self.server.handle($1, $2, $3) 
+      });
     }
     return this.app;
   }
