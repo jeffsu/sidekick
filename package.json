@@ -1,22 +1,22 @@
 {
-  "name": "parasite",
+  "name": "sidekick",
   "description": "Realtime site tools",
   "keywords": [ "javascript", "language", "nodejs", "stats", "monitoring" ],
   "author": "Jeff Su, Chris Bleakley",
-  "version": "0.0.1",
+  "version": "0.0.1-pre1",
   "licenses": [ { "type": "MIT" }],
   "engines": { "node": ">=0.4.0" },
-  "directories": { "lib": "./lib/parasite" },
-  "main" : "./lib/parasite/index",
+  "directories": { "lib": "./lib/sidekick" },
+  "main" : "./lib/sidekick/index",
   "bin": {},
   "dependencies": { 
     "mochiscript": ">=0.5.3",
-    "tempo": "",
-    "connect": ""
+    "tempo": "0.0.3",
+    "connect": "2.2.0"
   },
 
   "repository": {
     "type": "git",
-    "url": "git://github.com/jeffsu/parasite.git"
+    "url": "git://github.com/jeffsu/sidekick.git"
   }
 }

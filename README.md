@@ -1,4 +1,4 @@
-parasite
+Sidekick
 ========
 
 Realtime site tools
