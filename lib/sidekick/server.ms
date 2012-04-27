@@ -41,7 +41,7 @@ export class Server {
       res.write(JSON.stringify({ 
         url: sdReq.url, 
         headers: sdReq.headers, 
-        responseTime: time
+        responseTime: meta.responseTime
       }) + "\n"); 
     });
   }

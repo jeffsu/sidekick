@@ -1,11 +1,17 @@
 export class Proxy {
   private {
-    var http = require('http');
+    var connect = require('connect');
   }
 
-  function initialize(options) {
-    this.front = options.front;
-    this.back  = options.back;
+  function connect(port, host) {
+    
+
+  }
+
+  function initialize(port, host) {
+    this.host = host;
+    this.port = port;
+    this.app = connect.createServer();
   }
 
 }

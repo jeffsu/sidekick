@@ -23,8 +23,7 @@ tailer.start();
 
 var profiler = new sidekick.clients.Profiler('localhost', SIDEKICK_PORT);
 profiler.on('request', function (data) { 
-  console.log("Response Status: "    + data.response.statusCode); 
-  console.log("Response Time: "    + data.response.time); 
-  console.log("Response headers: " + data.response.headers); 
+  console.log("Response Time: "    + data.responseTime); 
+  console.log("Response headers: " + data.headers); 
 });
 profiler.start();
