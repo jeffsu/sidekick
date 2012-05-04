@@ -32,7 +32,7 @@ export class Middleware {
     return this.app;
   }
 
-  function listen(port) {
-    this.getApp().listen(port);
+  function listen(port, host) {
+    this.getApp().listen(port, host);
   }
 }
