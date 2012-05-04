@@ -18,6 +18,10 @@ export class Middleware {
     };
   }
 
+  function data(data) {
+    this.listener.emit('data', data);
+  }
+
   function getApp() {
     if (!this.app) {
       this.app = connect.createServer();

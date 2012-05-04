@@ -20,6 +20,10 @@ export class Server {
     else if (parsed.pathname == '/profile') {
       this.profileJSON(req, res, parsed);
     }
+
+    else if (parsed.pathname == '/data') {
+      this.dataJSON(req, res, parsed); 
+    }
     
     else {
       next();
@@ -31,6 +35,13 @@ export class Server {
     res.writeHead(200, { 'Content-type': 'application/json' });
     this.listener.attach(req, #{ 
       res.write(JSON.stringify({ url: $1.url, headers: $1.headers }) + "\n"); 
+    });
+  }
+
+  function dataJSON(req, res, parsed) {
+    res.writeHead(200, { 'Content-type': 'application/json' });
+    this.listener.attachData(req, #(data) {
+      res.write(JSON.stringify(data));
     });
   }
 

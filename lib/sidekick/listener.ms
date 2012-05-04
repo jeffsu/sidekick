@@ -9,6 +9,14 @@ export class Listener {
     this.listeners = {};
     this.afters    = {};
     this.afterCount = 0;
+
+    this.data = {};
+    this.on('data', #(data) {
+      for (var k in self.data) {
+        var listener = self.data[k];
+        listener(data);
+      }
+    });
   }
 
   function attach(req, cb) {
@@ -21,6 +29,18 @@ export class Listener {
     });
 
     this.listeners[id] = cb;
+  }
+
+  function attachData(req, cb) {
+    var id = this.randId();
+    this.emit('add', id);
+
+    req.on('close', #{
+      delete self.data[id];
+      self.emit('delete', id);
+    });
+
+    this.data[id] = cb;
   }
 
   function attachAfter(req, cb) {
