@@ -1,46 +1,58 @@
+/*
+ * A full on example of how to use sidekick as a proxy multiplexer
+ * 1) create sd server
+ * 2) create app
+ * 3) create clone port
+ * 4) create sd client
+ * 5) create a proxy 
+ * 6) add proxy to client
+ */
 var connect  = require('connect');
 var sidekick = require('../lib/sidekick');
 var http     = require('http');
 
-var SERVER_PORT   = 8888;
-var SERVER2_PORT  = 8889;
+var SD_PORT    = 7777;
+var ORIG_PORT  = 7778;
+var CLONE_PORT = 7779;
 
-var SIDEKICK_PORT = 8887;
+// Create sidekick server
+var sd = new sidekick.Server();
+sd.listen(SD_PORT);
 
-var sd  = sidekick.middleware();
-var app = connect.createServer();
-app.use(sd.connect());
-app.use(function (req, res, next) { 
+// Create original app and attach sidekick server to it
+var origApp = connect.createServer();
+origApp.use(sd.connect());
+origApp.use(function (req, res, next) { 
   setTimeout(function () { 
+    console.log('Orig Server: Get request!');
     res.end("hello");
   }, 200);
 });
+origApp.listen(ORIG_PORT);
 
-var app2 = connect.createServer();
-app2.use(function (req, res, next) { 
-  console.log('multiplexed');
-  res.end('hello');
+// Create clone app
+var cloneApp = connect.createServer();
+cloneApp.use(function (req, res, next) { 
+  setTimeout(function () { 
+    console.log('Clone app: Get request!');
+    res.end("hello");
+  }, 200);
+});
+cloneApp.listen(CLONE_PORT);
+
+// Create sidekick client to listen to sidekick server
+var client = new sidekick.Client('localhost', SD_PORT);
+client.on('response', function (data) { 
+  console.log("Sidekick Client: " + JSON.stringify(data));
 });
 
-app2.listen(SERVER2_PORT);
-app.listen(SERVER_PORT);
-sd.listen(SIDEKICK_PORT);
-
-var tailer = new sidekick.clients.Tailer('localhost', SIDEKICK_PORT);
-tailer.on('request', function (request) { console.log(request.url); });
-tailer.start();
-
-var profiler = new sidekick.clients.Profiler('localhost', SIDEKICK_PORT);
-profiler.on('request', function (data) { 
-  console.log("Response Time: "    + data.responseTime); 
-  console.log("Response headers: " + data.headers); 
+// Create proxy
+var proxy = client.proxy('localhost', CLONE_PORT);
+proxy.on('response', function (code, body, headers) {
+  console.log("Proxy: got response.");
 });
-profiler.start();
 
-var multi = new sidekick.clients.multi.Multi();
-multi.listen('localhost', SIDEKICK_PORT);
-var client = new sidekick.clients.multi.Client('localhost', SERVER2_PORT);
-client.on('data', function (chunk) { console.log('DATA: ' + chunk.toString()) });
-multi.addClient(client);
-
-console.log("Send requests to port: " + SERVER_PORT);
+setInterval(function () { 
+  console.log("External Request: Make request to original server");
+  http.get({ host: 'localhost', port: ORIG_PORT, path: '/' }, function (res) {});
+}, 1000);

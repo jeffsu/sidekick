@@ -1,74 +1,37 @@
-var sidekick = require('./index');
-
 export class Proxy {
+  include $m.EventEmitter;
+
   private {
     var connect = require('connect');
     var http = require('http');
   }
 
-  function proxy(req, res) {
+  function initialize(host, port) {
+    this.host = host;
+    this.port = port;
+  }
+
+  function send(data) {
     var options = {
-      method:  req.method,
-      headers: req.headers,
-      path:    req.url,
-      port:    this.back.port,
-      host:    this.back.host
+      method:  data.method,
+      headers: data.headers,
+      path:    data.path,
+      port:    this.port,
+      host:    this.host
     };
 
     var preq = http.request(options, #(pres) {
-      res.writeHead(pres.statusCode, pres.headers);
-      pres.on('data', #{ res.write($1) });
-      pres.on('end',  #{ res.end() });
+      var body = [];
+      pres.on('data', #{ body.push($1.toString())});
+      pres.on('end',  #{ self.emit('response', pres.statusCode, body.join(''), pres.headers) });
     });
 
-    if (req.method == 'GET' || req.method == 'DELETE') {
+    if (data.method == 'GET' || data.method == 'DELETE') {
       preq.end();
     } else {
-      req.on('data', #{ preq.write($1) });
-      req.on('end',  #{ preq.end() });
+      if (data.body) preq.write(data.body);
+      preq.end();
     }
-  }
-
-  function connect() {
-    return #(req, res, next) {
-      self.proxy(req, res);
-    };
-  }
-
-  function listen(port, host) {
-    if (this.front) {
-      port = port || this.front.port;
-      host = host || this.front.host;
-    }
-
-    var sk = sidekick.middleware();
-
-    var app = connect.createServer();
-    app.use(sk.connect());
-    app.use(this.connect());
-    sk.listen(this.sk.port, this.sk.host);
-
-    app.listen(port, host);
-  }
-
-  function initialize(config) {
-    this.config = config;
-    if (config.front) {
-      this.front  = {
-        port: config.front.port,
-        host: config.front.host
-      };
-    }
-
-    this.back = {
-      port: config.back.port,
-      host: config.back.host
-    };
-
-    this.sk = {
-      port: config.sk.port,
-      host: config.sk.host
-    };
   }
 }
 
