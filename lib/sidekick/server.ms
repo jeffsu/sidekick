@@ -56,7 +56,17 @@ export class Server {
         method:  req.method
       };
       
-      this.emit('data', JSON.stringify(data));
+      var method = req.method;
+      if (method == 'POST' || method == 'PUT') {
+        var body = [];
+        req.on('data', #{ body.push($1.toString()) });
+        req.on('end', #{ 
+          data.body = body.join('');
+          self.emit('data', JSON.stringify(data)); 
+        });
+      } else {
+        this.emit('data', JSON.stringify(data));
+      }
     }
 
     next();

@@ -48,10 +48,17 @@ client.on('response', function (data) {
 // Create proxy
 var proxy = client.proxy('localhost', CLONE_PORT);
 proxy.on('response', function (code, body, headers) {
-  console.log("Proxy: got response.");
+  console.log("Proxy: got response.", body);
 });
 
 setInterval(function () { 
   console.log("External Request: Make request to original server");
   http.get({ host: 'localhost', port: ORIG_PORT, path: '/' }, function (res) {});
 }, 1000);
+
+setInterval(function () { 
+  console.log("External Request: Make request to original server");
+  var req = http.request({ host: 'localhost', port: ORIG_PORT, path: '/', method: 'POST' });
+  req.write('data');
+  req.end();
+}, 2000);
