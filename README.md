@@ -28,4 +28,20 @@ client
 
 ### Client
 
+The client is a way to tap into the sidekick server and subscribe to requests.
+
+{{{
+  var client = sidekick.Client(host, port);
+  client.on('request', function (data) {
+    /*
+     * data == {
+     *   headers: <hash>,
+     *   path: <string>,
+     *   method: <integer>
+     * }
+     *
+     # ... do something ... 
+     */
+  });
+}}}
 
