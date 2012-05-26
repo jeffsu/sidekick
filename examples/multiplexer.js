@@ -56,9 +56,3 @@ setInterval(function () {
   http.get({ host: 'localhost', port: ORIG_PORT, path: '/' }, function (res) {});
 }, 1000);
 
-setInterval(function () { 
-  console.log("External Request: Make request to original server");
-  var req = http.request({ host: 'localhost', port: ORIG_PORT, path: '/', method: 'POST' });
-  req.write('data');
-  req.end();
-}, 2000);

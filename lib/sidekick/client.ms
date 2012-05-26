@@ -21,7 +21,7 @@ export class Client {
     });
 
     req.on('response', #(res) {
-      res.on('data', #{ self.emit('response', JSON.parse($1.toString())) });
+      res.on('data', #{ self.emit('request', JSON.parse($1.toString())) });
       res.on('end', #{ self.emit('end', res) });
     });
 
@@ -31,7 +31,7 @@ export class Client {
   function proxy(host, port) {
     if (!this.proxies) {
       this.proxies = [];
-      this.on('response', #(data) {
+      this.on('request', #(data) {
         foreach (var proxy in self.proxies) {
           proxy.send(data);
         }
