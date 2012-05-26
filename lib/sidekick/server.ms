@@ -13,7 +13,8 @@ export class Server {
   }
 
   function setup() {
-    this.on('data', #(json) { self.writeToPool(json, 'data'); });
+    this.on('request', #(data) { self.writeToPool({ type: 'request', data: data }, 'data'); });
+    this.on('data', #(data) { self.writeToPool({ type: 'data', data: data }, 'data'); });
   }
 
   function app() {
@@ -62,10 +63,10 @@ export class Server {
         req.on('data', #{ body.push($1.toString()) });
         req.on('end', #{ 
           data.body = body.join('');
-          self.emit('data', JSON.stringify(data)); 
+          self.emit('request', data); 
         });
       } else {
-        this.emit('data', JSON.stringify(data));
+        this.emit('request', data);
       }
     }
 
@@ -78,8 +79,9 @@ export class Server {
 
   function writeToPool(data, poolName) {
     var pool = this.pool[poolName];
+    var json = JSON.stringify(data);
     for (var key in pool) {
-      pool[key].write(data + "\n");
+      pool[key].write(json + "\n");
     }
   }
 

@@ -21,7 +21,10 @@ export class Client {
     });
 
     req.on('response', #(res) {
-      res.on('data', #{ self.emit('request', JSON.parse($1.toString())) });
+      res.on('data', #{ 
+        var json = JSON.parse($1.toString());
+        self.emit(json.type, json.data);
+      });
       res.on('end', #{ self.emit('end', res) });
     });
 

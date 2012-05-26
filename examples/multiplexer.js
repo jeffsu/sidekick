@@ -20,9 +20,11 @@ sd.listen(SD_PORT);
 
 // Create original app and attach sidekick server to it
 var origApp = connect.createServer();
+var count = 0;
 origApp.use(sd.connect());
 origApp.use(function (req, res, next) { 
   setTimeout(function () { 
+    sd.emit('data', ++count); 
     console.log('Orig Server: Get request!');
     res.end("hello");
   }, 200);
@@ -41,14 +43,19 @@ cloneApp.listen(CLONE_PORT);
 
 // Create sidekick client to listen to sidekick server
 var client = new sidekick.Client('localhost', SD_PORT);
-client.on('response', function (data) { 
+client.on('request', function (data) { 
   console.log("Sidekick Client: " + JSON.stringify(data));
+});
+
+client.on('data', function (data) {
+  console.log('Sidekick Client Data: ' + JSON.stringify(data));
 });
 
 // Create proxy
 var proxy = client.proxy('localhost', CLONE_PORT);
 proxy.on('response', function (code, body, headers) {
-  console.log("Proxy: got response.", body);
+  console.log("Proxy: got response.");
+  console.log("--------------------------");
 });
 
 setInterval(function () { 
