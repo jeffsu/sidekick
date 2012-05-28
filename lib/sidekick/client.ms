@@ -17,13 +17,13 @@ export class Client {
       host: this.host,
       port: this.port,
       method: 'GET',
-      path: '/data'
+      path: '/requests'
     });
 
     req.on('response', #(res) {
       res.on('data', #{ 
         var json = JSON.parse($1.toString());
-        self.emit(json.type, json.data);
+        self.emit('request', json);
       });
       res.on('end', #{ self.emit('end', res) });
     });

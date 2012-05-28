@@ -4,17 +4,23 @@ export class Server {
 
   private {
     var url = require('url');
+    var IS_PUBLISH = true;
   }
 
   function initialize() {
-    this.pool   = { data: {} };
-    this.counts = { data: 0 };
+    this.pool   = { requests: {} };
+    this.counts = { requests: 0 };
+    this.subscribers      = {};
+    this.subscriberCounts = {};
     this.setup();
   }
 
+  function publish(key, data) {
+    this.writeToPool(key, data, IS_PUBLISH);
+  }
+
   function setup() {
-    this.on('request', #(data) { self.writeToPool({ type: 'request', data: data }, 'data'); });
-    this.on('data', #(data) { self.writeToPool({ type: 'data', data: data }, 'data'); });
+    this.on('request', #(data) { self.writeToPool('requests', data); });
   }
 
   function app() {
@@ -35,8 +41,14 @@ export class Server {
   }
 
   function handleSidekick(req, res, next) {
-    if (req.url == '/data') {
-      this.handleData(req, res); 
+    var m = null;
+
+    if (req.url == '/requests') {
+      this.addToPool(req, res, 'requests'); 
+    }
+
+    else if (m = req.url.match(/^\/subscribe\/([\w-\.]+)/)) {
+      this.addToPool(req, res, m[1], IS_PUBLISH);
     }
     
     else {
@@ -73,23 +85,22 @@ export class Server {
     next();
   }
 
-  function handleData(req, res, next) {
-    this.addToPool(req, res, 'data');
-  }
-
-  function writeToPool(data, poolName) {
-    var pool = this.pool[poolName];
+  function writeToPool(data, poolName, isPublish) {
+    var pool = isPublish ? this.subscribers[poolName] : this.pool[poolName];
     var json = JSON.stringify(data);
     for (var key in pool) {
       pool[key].write(json + "\n");
     }
   }
 
-  function addToPool(req, res, poolName) {
-    var pool = this.pool[poolName];
+  function addToPool(req, res, poolName, isPublish) {
+    var pool   = isPublish ? this.subscribers[poolName] : this.pool[poolName];
+    var counts = isPublish ? this.subscriberCounts[poolName] : this.counts[poolName];
+    if (!counts[poolName]) counts[poolName] = 0;
+    counts[poolName]++;
+
     var id = this.getId(pool);
     pool[id] = res;
-    this.counts[poolName]++;
 
     req.on('close', #{
       delete pool[id];

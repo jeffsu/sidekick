@@ -24,7 +24,7 @@ var count = 0;
 origApp.use(sd.connect());
 origApp.use(function (req, res, next) { 
   setTimeout(function () { 
-    sd.emit('data', ++count); 
+    //sd.emit('data', ++count); 
     console.log('Orig Server: Get request!');
     res.end("hello");
   }, 200);
