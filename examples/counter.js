@@ -17,10 +17,13 @@ sd.listen(SD_PORT);
 
 // Create original app and attach sidekick server to it
 var origApp = connect.createServer();
+var count   = 0;
 origApp.use(sd.connect());
 origApp.use(function (req, res, next) { 
   setTimeout(function () { 
     console.log('Orig Server: Get request!');
+    sd.publish("request-count", ++count);
+
     res.end("hello");
   }, 200);
 });
@@ -29,9 +32,8 @@ origApp.listen(ORIG_PORT);
 
 // Create sidekick client to listen to sidekick server
 var client = new sidekick.Client('localhost', SD_PORT);
-var count = 0;
-client.on('response', function (data) { 
-  console.log("Number of Requests: " + ++count);
+client.subscribe('request-count', function (data) { 
+  console.log("Number of Requests: " + data);
 });
 
 

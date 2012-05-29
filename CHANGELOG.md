@@ -1,3 +1,7 @@
+### 0.0.1-pre7
+
+  * pubsub
+  
 ### 0.0.1-pre6
 
   * support for arbitrary data packets

@@ -9,51 +9,45 @@ export class Client {
   function initialize(host, port) {
     this.host = host;
     this.port = port;
-    this.listen();
+    this.subscriptions = {};
   }
 
   function subscribe(key, handler) {
-    var req = http.request({
-      host:   this.host,
-      port:   this.port,
-      method: 'GET',
-      path:   '/subscribe/' + key
-    });
-
-    req.on('response', #(res) {
-      res.on('data', #{ 
-        var json = JSON.parse($1.toString());
-        handler(json);
+    if (! this.subscriptions[key]) {
+      this.subscriptions[key] = [];
+      var req = http.request({
+        host:   this.host,
+        port:   this.port,
+        method: 'GET',
+        path:   '/subscribe/' + key
       });
-      res.on('end', #{ self.emit('end', res) });
-    });
 
-    req.end();
+      req.on('response', #(res) {
+        res.on('data', #{ 
+          var json = JSON.parse($1.toString());
+          self.publish(key, json);
+        });
+        res.on('end', #{ self.emit('end', res) });
+      });
+      req.end();
+    }
+
+    this.subscriptions[key].push(handler);
   }
 
-  function listen() {
-    var req = http.request({
-      host: this.host,
-      port: this.port,
-      method: 'GET',
-      path: '/requests'
-    });
-
-    req.on('response', #(res) {
-      res.on('data', #{ 
-        var json = JSON.parse($1.toString());
-        self.emit('request', json);
-      });
-      res.on('end', #{ self.emit('end', res) });
-    });
-
-    req.end();
+  function publish(key, data) {
+    var subscribers = null; 
+    if (subscribers = this.subscriptions[key]) {
+      foreach (var s in subscribers) {
+        s(data);
+      }
+    }
   }
 
   function proxy(host, port) {
     if (!this.proxies) {
       this.proxies = [];
-      this.on('request', #(data) {
+      this.subscribe('sidekick.requests', #(data) {
         foreach (var proxy in self.proxies) {
           proxy.send(data);
         }

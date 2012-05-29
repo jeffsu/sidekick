@@ -24,14 +24,14 @@ var count = 0;
 origApp.use(sd.connect());
 origApp.use(function (req, res, next) { 
   setTimeout(function () { 
-    sd.publish('count', ++count); 
     console.log('Orig Server: Get request!');
+    sd.publish('count', ++count); 
     res.end("hello");
   }, 200);
 });
 origApp.listen(ORIG_PORT);
 
-// Create clone app
+// Create clone app to run in parallel with original app
 var cloneApp = connect.createServer();
 cloneApp.use(function (req, res, next) { 
   setTimeout(function () { 
@@ -43,7 +43,7 @@ cloneApp.listen(CLONE_PORT);
 
 // Create sidekick client to listen to sidekick server
 var client = new sidekick.Client('localhost', SD_PORT);
-client.on('request', function (data) { 
+client.subscribe('sidekick.requests', function (data) { 
   console.log("Sidekick Client: " + JSON.stringify(data));
 });
 
@@ -51,11 +51,7 @@ client.subscribe('count', function (data) {
   console.log("Sidekick Client Count: " + data);
 });
 
-client.on('data', function (data) {
-  console.log('Sidekick Client Data: ' + JSON.stringify(data));
-});
-
-// Create proxy
+// Create proxy to send requests to cloned app
 var proxy = client.proxy('localhost', CLONE_PORT);
 proxy.on('response', function (code, body, headers) {
   console.log("Proxy: got response.");

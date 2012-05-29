@@ -4,25 +4,15 @@ export class Server {
 
   private {
     var url = require('url');
-    var IS_PUBLISH = true;
   }
 
   function initialize() {
     this.pools  = {};
     this.counts = {};
-
-    this.subscribers      = {};
-    this.subscriberCounts = {};
-
-    this.setup();
   }
 
   function publish(key, data) {
-    this.writeToPool(key, data, IS_PUBLISH);
-  }
-
-  function setup() {
-    this.on('request', #(data) { self.writeToPool('requests', data); });
+    this.writeToPool(key, data);
   }
 
   function app() {
@@ -45,12 +35,8 @@ export class Server {
   function handleSidekick(req, res, next) {
     var m = null;
 
-    if (req.url == '/requests') {
-      this.addToPool(req, res, 'requests'); 
-    }
-
-    else if (m = req.url.match(/^\/subscribe\/([\w-\.]+)/)) {
-      this.addToPool(req, res, m[1], IS_PUBLISH);
+    if (m = req.url.match(/^\/subscribe\/([\w-\.]+)/)) {
+      this.addToPool(req, res, m[1]);
     }
     
     else {
@@ -64,12 +50,13 @@ export class Server {
   }
 
   function handle(req, res, next) {
-    if (self.counts.requests > 0) {
+    if (self.counts['sidekick.requests'] > 0) {
       var data = {
         path:    req.url,
         headers: req.headers,
         method:  req.method
       };
+
       
       var method = req.method;
       if (method == 'POST' || method == 'PUT') {
@@ -77,19 +64,19 @@ export class Server {
         req.on('data', #{ body.push($1.toString()) });
         req.on('end', #{ 
           data.body = body.join('');
-          self.writeToPool('requests', data);
+          self.writeToPool('sidekick.requests', data);
         });
       } else {
-        this.writeToPool('requests', data);
+        this.writeToPool('sidekick.requests', data);
       }
     }
 
     next();
   }
 
-  function writeToPool(poolName, data, isPublish) {
-    var pools  = isPublish ? this.subscribers : this.pools;
-    var counts = isPublish ? this.subscriberCounts : this.counts;
+  function writeToPool(poolName, data) {
+    var pools  = this.pools;
+    var counts = this.counts;
 
     if (!pools[poolName]) return;
     var pool = pools[poolName];
@@ -100,9 +87,9 @@ export class Server {
     for (var key in pool) pool[key].write(json + "\n");
   }
 
-  function addToPool(req, res, poolName, isPublish) {
-    var pools  = isPublish ? this.subscribers : this.pools;
-    var counts = isPublish ? this.subscriberCounts : this.counts;
+  function addToPool(req, res, poolName) {
+    var pools  = this.pools;
+    var counts = this.counts;
     if (!counts[poolName]) counts[poolName] = 0;
     if (!pools[poolName])  pools[poolName]  = {};
 
