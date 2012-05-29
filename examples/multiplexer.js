@@ -24,7 +24,7 @@ var count = 0;
 origApp.use(sd.connect());
 origApp.use(function (req, res, next) { 
   setTimeout(function () { 
-    //sd.emit('data', ++count); 
+    sd.publish('count', ++count); 
     console.log('Orig Server: Get request!');
     res.end("hello");
   }, 200);
@@ -45,6 +45,10 @@ cloneApp.listen(CLONE_PORT);
 var client = new sidekick.Client('localhost', SD_PORT);
 client.on('request', function (data) { 
   console.log("Sidekick Client: " + JSON.stringify(data));
+});
+
+client.subscribe('count', function (data) {
+  console.log("Sidekick Client Count: " + data);
 });
 
 client.on('data', function (data) {

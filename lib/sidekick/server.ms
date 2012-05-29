@@ -8,10 +8,12 @@ export class Server {
   }
 
   function initialize() {
-    this.pool   = { requests: {} };
-    this.counts = { requests: 0 };
+    this.pools  = {};
+    this.counts = {};
+
     this.subscribers      = {};
     this.subscriberCounts = {};
+
     this.setup();
   }
 
@@ -62,7 +64,7 @@ export class Server {
   }
 
   function handle(req, res, next) {
-    if (self.counts.data > 0) {
+    if (self.counts.requests > 0) {
       var data = {
         path:    req.url,
         headers: req.headers,
@@ -75,28 +77,36 @@ export class Server {
         req.on('data', #{ body.push($1.toString()) });
         req.on('end', #{ 
           data.body = body.join('');
-          self.emit('request', data); 
+          self.writeToPool('requests', data);
         });
       } else {
-        this.emit('request', data);
+        this.writeToPool('requests', data);
       }
     }
 
     next();
   }
 
-  function writeToPool(data, poolName, isPublish) {
-    var pool = isPublish ? this.subscribers[poolName] : this.pool[poolName];
+  function writeToPool(poolName, data, isPublish) {
+    var pools  = isPublish ? this.subscribers : this.pools;
+    var counts = isPublish ? this.subscriberCounts : this.counts;
+
+    if (!pools[poolName]) return;
+    var pool = pools[poolName];
+
+    if (!counts[poolName]) return;
+
     var json = JSON.stringify(data);
-    for (var key in pool) {
-      pool[key].write(json + "\n");
-    }
+    for (var key in pool) pool[key].write(json + "\n");
   }
 
   function addToPool(req, res, poolName, isPublish) {
-    var pool   = isPublish ? this.subscribers[poolName] : this.pool[poolName];
-    var counts = isPublish ? this.subscriberCounts[poolName] : this.counts[poolName];
+    var pools  = isPublish ? this.subscribers : this.pools;
+    var counts = isPublish ? this.subscriberCounts : this.counts;
     if (!counts[poolName]) counts[poolName] = 0;
+    if (!pools[poolName])  pools[poolName]  = {};
+
+    var pool = pools[poolName];
     counts[poolName]++;
 
     var id = this.getId(pool);

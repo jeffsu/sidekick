@@ -12,6 +12,25 @@ export class Client {
     this.listen();
   }
 
+  function subscribe(key, handler) {
+    var req = http.request({
+      host:   this.host,
+      port:   this.port,
+      method: 'GET',
+      path:   '/subscribe/' + key
+    });
+
+    req.on('response', #(res) {
+      res.on('data', #{ 
+        var json = JSON.parse($1.toString());
+        handler(json);
+      });
+      res.on('end', #{ self.emit('end', res) });
+    });
+
+    req.end();
+  }
+
   function listen() {
     var req = http.request({
       host: this.host,
