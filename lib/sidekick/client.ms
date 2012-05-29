@@ -10,26 +10,40 @@ export class Client {
     this.host = host;
     this.port = port;
     this.subscriptions = {};
+    this.requests = [];
+  }
+
+  function listen(key) {
+    var req = http.request({
+      host:   this.host,
+      port:   this.port,
+      method: 'GET',
+      path:   '/subscribe/' + key
+    });
+
+    req.on('response', #(res) {
+      res.on('data', #{ 
+        var json = JSON.parse($1.toString());
+        self.publish(key, json);
+      });
+      res.on('end', #{ self.listen(key) });
+    });
+    req.end();
+    this.requests.push(req);
+  }
+
+  function stop() {
+    this.subscriptions = {};
+    foreach (var req in this.requests) {
+      try { req.abort(); } catch(e) { };
+    }
+    this.requests = [];
   }
 
   function subscribe(key, handler) {
     if (! this.subscriptions[key]) {
       this.subscriptions[key] = [];
-      var req = http.request({
-        host:   this.host,
-        port:   this.port,
-        method: 'GET',
-        path:   '/subscribe/' + key
-      });
-
-      req.on('response', #(res) {
-        res.on('data', #{ 
-          var json = JSON.parse($1.toString());
-          self.publish(key, json);
-        });
-        res.on('end', #{ self.emit('end', res) });
-      });
-      req.end();
+      this.listen(key);
     }
 
     this.subscriptions[key].push(handler);

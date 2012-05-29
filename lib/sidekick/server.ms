@@ -35,7 +35,7 @@ export class Server {
   function handleSidekick(req, res, next) {
     var m = null;
 
-    if (m = req.url.match(/^\/subscribe\/([\w-\.]+)/)) {
+    if (m = req.url.match(/^\/subscribe\/([^\/]+)/)) {
       this.addToPool(req, res, m[1]);
     }
     

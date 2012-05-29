@@ -1,3 +1,8 @@
+### 0.0.1-pre8
+
+  * adding abort to client
+  * adding retry to client
+  
 ### 0.0.1-pre7
 
   * pubsub

@@ -3,7 +3,7 @@
   "description": "Realtime site tools",
   "keywords": [ "javascript", "language", "nodejs", "stats", "monitoring" ],
   "author": "Jeff Su, Chris Bleakley",
-  "version": "0.0.1-pre7",
+  "version": "0.0.1-pre8",
   "licenses": [ { "type": "MIT" }],
   "engines": { "node": ">=0.4.0" },
   "directories": { "lib": "./lib/sidekick" },
