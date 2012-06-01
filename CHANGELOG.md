@@ -1,3 +1,7 @@
+### 0.0.1
+
+  * adding hasSubscribers to sd server
+ 
 ### 0.0.1-pre8
 
   * adding abort to client

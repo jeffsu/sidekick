@@ -74,14 +74,15 @@ export class Server {
     next();
   }
 
+  function hasSubscribers(poolName) {
+    return this.counts[poolName];
+  }
+
   function writeToPool(poolName, data) {
-    var pools  = this.pools;
-    var counts = this.counts;
+    if (!this.hasSubscribers(poolName)) return;  
 
-    if (!pools[poolName]) return;
-    var pool = pools[poolName];
-
-    if (!counts[poolName]) return;
+    var pool = this.pools[poolName];
+    if (!pool) return;
 
     var json = JSON.stringify(data);
     for (var key in pool) pool[key].write(json + "\n");
