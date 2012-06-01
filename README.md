@@ -5,6 +5,8 @@ Realtime site monitoring helper. Sidekick provides a few things:
   1. Insight to incomming requests and the ability to react to them in code
   1. Multiplexing http requests.  This is especially useful for testing live requests against a dev environment.
      
+Please look into the examples directory for usage.
+
 ## Components in Sidekick
 
 ### Server
