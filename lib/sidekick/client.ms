@@ -21,7 +21,7 @@ export class Client {
       socket.on('close', #{ self.p = null; self.listen() })
       this.p = new Protocol(socket);
       this.p.on('message', #(k, message) {
-        self.publish(k, JSON.parse(message));
+        self.publish(k, message);
       });
     }
   }
@@ -30,19 +30,19 @@ export class Client {
     try { this.p.abort(); } catch(e) { };
   }
 
-  function subscribe(key, handler) {
-    if (! this.subscriptions[key]) {
-      this.subscriptions[key] = [];
+  function subscribe(channel, handler) {
+    if (! this.subscriptions[channel]) {
+      this.subscriptions[channel] = [];
       this.listen();
-      this.p.send('subscribe', key);
+      this.p.send('subscribe', this.p.escapeData(channel));
     }
 
-    this.subscriptions[key].push(handler);
+    this.subscriptions[channel].push(handler);
   }
 
-  function publish(key, data) {
+  function publish(channel, data) {
     var subscribers = null; 
-    if (subscribers = this.subscriptions[key]) {
+    if (subscribers = this.subscriptions[channel]) {
       foreach (var s in subscribers) {
         s(data);
       }

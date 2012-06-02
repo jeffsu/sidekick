@@ -13,8 +13,8 @@ export class Server {
     this.counts = {};
   }
 
-  function publish(key, data) {
-    this.writeToPool(key, data);
+  function publish(channel, data) {
+    this.writeToPool(channel, data);
   }
 
   function app() {
@@ -27,8 +27,8 @@ export class Server {
   function listen(port, address) {
     var server = net.createServer(#(socket) {
       var p = new Protocol(socket);
-      p.on('message', #(key, message) {
-        if (key == 'subscribe') self.addToPool(p, message);
+      p.on('message', #(key, channel) {
+        if (key == 'subscribe') self.addToPool(p, channel);
       });
     });
     server.listen(port, address);
@@ -91,8 +91,9 @@ export class Server {
     var pool = this.pools[poolName];
     if (!pool) return;
 
-    var json = JSON.stringify(data);
-    for (var key in pool) pool[key].send(poolName, json);
+    var channel = Protocol.escapeChannel(poolName);
+    var payload = Protocol.escapeData(data);
+    for (var key in pool) pool[key].send(channel, payload);
   }
 
   function addToPool(p, poolName) {

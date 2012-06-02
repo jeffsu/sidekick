@@ -1,3 +1,5 @@
+var qs = require('querystring');
+
 export class Protocol {
   include $m.EventEmitter;
 
@@ -25,9 +27,42 @@ export class Protocol {
         str = chunks.shift();
       }
 
-      var match = str.match(/^(.*?):(.*)$/);
-      this.emit('message', match[1], match[2]);
+      var match = str.match(/^(.*?)&(.*)$/);
+      this.emit('message', this.parseChannel(match[1]), this.parseData(match[2]));
     }
+  }
+
+  static function escapeData(data) {
+    return JSON.stringify(data);
+  }
+
+  static function parseData(data) {
+    return JSON.parse(data);
+  }
+
+  static function parseChannel(channel) {
+    return qs.unescape(channel);
+  }
+
+  static function escapeChannel(channel) {
+    return qs.escape(channel);
+  }
+
+
+  function escapeData(data) {
+    return JSON.stringify(data);
+  }
+
+  function parseData(data) {
+    return JSON.parse(data);
+  }
+
+  function parseChannel(channel) {
+    return qs.unescape(channel);
+  }
+
+  function escapeChannel(channel) {
+    return qs.escape(channel);
   }
 
   function abort() {
@@ -35,8 +70,8 @@ export class Protocol {
     this.socket.end();
   }
 
-  function send(key, data) {
-    this.socket.write(key + ':' + data + "\n");
+  function send(channel, data) {
+    this.socket.write(channel + '&' + data + "\n");
   }
 
 }
