@@ -1,6 +1,7 @@
 ### 0.0.2
   
   * moving over to a tcp protocol
+  * setting reconnect in client
 
 ### 0.0.1
 
