@@ -7,6 +7,8 @@ export class Protocol {
     this.socket = socket;
     this._data  = [];
     socket.on('data', #(chunk) { self.data(chunk) });
+    socket.setKeepAlive(true);
+    socket.setTimeout(0);
   }
 
   function data(chunk) {

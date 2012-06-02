@@ -16,9 +16,14 @@ export class Client {
 
   function listen() {
     if (!this.p) {
+      this.shouldListen = true;
       var socket = net.createConnection(this.port, this.host)
-      socket.setKeepAlive(true);
-      socket.on('close', #{ self.p = null; self.listen() })
+
+      socket.on('close', #{ 
+        self.p = null; 
+        if (self.shouldListen) setTimeout(#{ self.listen() }, 3000);
+      });
+
       this.p = new Protocol(socket);
       this.p.on('message', #(k, message) {
         self.publish(k, message);
@@ -27,6 +32,7 @@ export class Client {
   }
 
   function stop() {
+    this.shouldListen = false;
     try { this.p.abort(); } catch(e) { };
   }
 
