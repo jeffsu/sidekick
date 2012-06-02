@@ -14,16 +14,16 @@ export class Client {
     this.subscriptions = {};
   }
 
-  function listen(key) {
+  function listen() {
     if (!this.p) {
       var socket = net.createConnection(this.port, this.host)
+      socket.setKeepAlive(true);
+      socket.on('close', #{ self.p = null; self.listen() })
       this.p = new Protocol(socket);
       this.p.on('message', #(k, message) {
         self.publish(k, JSON.parse(message));
       });
     }
-
-    this.p.send('subscribe', key);
   }
 
   function stop() {
@@ -33,7 +33,8 @@ export class Client {
   function subscribe(key, handler) {
     if (! this.subscriptions[key]) {
       this.subscriptions[key] = [];
-      this.listen(key);
+      this.listen();
+      this.p.send('subscribe', key);
     }
 
     this.subscriptions[key].push(handler);
