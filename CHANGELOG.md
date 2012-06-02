@@ -1,3 +1,7 @@
+### 0.0.2
+  
+  * moving over to a tcp protocol
+
 ### 0.0.1
 
   * adding hasSubscribers to sd server
