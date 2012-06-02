@@ -1,3 +1,5 @@
+var net = require('net');
+var Protocol = require('./protocol');
 
 export class Server {
   include $m.EventEmitter;
@@ -22,10 +24,15 @@ export class Server {
     return app;
   }
 
-  function listen() {
-    var app = this.app();
-    app.listen.apply(app, arguments);
-    return app;
+  function listen(port, address) {
+    var server = net.createServer(#(socket) {
+      var p = new Protocol(socket);
+      p.on('message', #(key, message) {
+        if (key == 'subscribe') self.addToPool(p, message);
+      });
+    });
+    server.listen(port, address);
+    return server;
   }
 
   function connectSidekick() {
@@ -85,10 +92,10 @@ export class Server {
     if (!pool) return;
 
     var json = JSON.stringify(data);
-    for (var key in pool) pool[key].write(json + "\n");
+    for (var key in pool) pool[key].send(poolName, json);
   }
 
-  function addToPool(req, res, poolName) {
+  function addToPool(p, poolName) {
     var pools  = this.pools;
     var counts = this.counts;
     if (!counts[poolName]) counts[poolName] = 0;
@@ -98,9 +105,9 @@ export class Server {
     counts[poolName]++;
 
     var id = this.getId(pool);
-    pool[id] = res;
+    pool[id] = p;
 
-    req.on('close', #{
+    p.on('close', #{
       delete pool[id];
       self.counts[poolName]--;
     });

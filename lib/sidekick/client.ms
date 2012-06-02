@@ -1,43 +1,33 @@
-var Proxy = require('./proxy');
+var Proxy    = require('./proxy');
+var Protocol = require('./protocol');
 
 export class Client {
   include $m.EventEmitter;
+
   private {
-    var http = require('http');
+    var net = require('net');
   }
 
   function initialize(host, port) {
     this.host = host;
     this.port = port;
     this.subscriptions = {};
-    this.requests = [];
   }
 
   function listen(key) {
-    var req = http.request({
-      host:   this.host,
-      port:   this.port,
-      method: 'GET',
-      path:   '/subscribe/' + key
-    });
-
-    req.on('response', #(res) {
-      res.on('data', #{ 
-        var json = JSON.parse($1.toString());
-        self.publish(key, json);
+    if (!this.p) {
+      var socket = net.createConnection(this.port, this.host)
+      this.p = new Protocol(socket);
+      this.p.on('message', #(k, message) {
+        self.publish(k, JSON.parse(message));
       });
-      res.on('end', #{ self.listen(key) });
-    });
-    req.end();
-    this.requests.push(req);
+    }
+
+    this.p.send('subscribe', key);
   }
 
   function stop() {
-    this.subscriptions = {};
-    foreach (var req in this.requests) {
-      try { req.abort(); } catch(e) { };
-    }
-    this.requests = [];
+    try { this.p.abort(); } catch(e) { };
   }
 
   function subscribe(key, handler) {
