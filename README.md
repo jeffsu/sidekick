@@ -1,4 +1,4 @@
- # Sidekick
+# Sidekick
 
 Realtime site monitoring helper. Sidekick provides a few things:
 
