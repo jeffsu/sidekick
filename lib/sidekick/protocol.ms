@@ -9,6 +9,7 @@ export class Protocol {
     socket.on('data', #(chunk) { self.data(chunk) });
     socket.setKeepAlive(true);
     socket.setTimeout(0);
+    socket.on('close', #{ console.log(self.hi); self.emit('close'); });
   }
 
   function data(chunk) {
@@ -30,7 +31,11 @@ export class Protocol {
       }
 
       var match = str.match(/^(.*?)&(.*)$/);
-      this.emit('message', this.parseChannel(match[1]), this.parseData(match[2]));
+      try {
+        this.emit('message', this.parseChannel(match[1]), match[2] == 'undefined' ? null : this.parseData(match[2]));
+      } catch(e) {
+        console.warn("Error receiving sidekick message: ", match[1], match[2]);
+      }
     }
   }
 
@@ -52,7 +57,7 @@ export class Protocol {
 
 
   function escapeData(data) {
-    return JSON.stringify(data);
+    return (data === null || data === undefined) ? "" : JSON.stringify(data);
   }
 
   function parseData(data) {
@@ -67,8 +72,7 @@ export class Protocol {
     return qs.escape(channel);
   }
 
-  function abort() {
-    this.emit('close');
+  function abort(bypassSocket) {
     this.socket.end();
   }
 
