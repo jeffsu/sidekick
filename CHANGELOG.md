@@ -2,6 +2,7 @@
   
   * moving over to a tcp protocol
   * setting reconnect in client
+  * adding tests
 
 ### 0.0.1
 
