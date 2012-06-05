@@ -67,7 +67,6 @@ export class Client {
     if (! this.subscriptions[channel]) {
       this.subscriptions[channel] = [];
       this.listen();
-      this.resubscribe();
     }
 
     this.subscriptions[channel].push(handler);
