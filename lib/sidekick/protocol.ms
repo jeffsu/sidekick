@@ -9,7 +9,7 @@ export class Protocol {
     socket.on('data', #(chunk) { self.data(chunk) });
     socket.setKeepAlive(true);
     socket.setTimeout(0);
-    socket.on('close', #{ console.log(self.hi); self.emit('close'); });
+    socket.on('close', #{ self.emit('close'); });
   }
 
   function data(chunk) {
