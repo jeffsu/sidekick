@@ -12,27 +12,54 @@ export class Client {
     this.host = host;
     this.port = port;
     this.subscriptions = {};
+    this.subscribed = {};
+    this.listen();
   }
 
   function listen() {
     if (!this.p) {
       this.shouldListen = true;
+      this.subscribed   = {};
+
       var socket = net.createConnection(this.port, this.host)
+      socket.on('error', #{ 
+        self.emit('error', $1) 
+      });
+
+      this.socket = socket;
 
       socket.on('close', #{ 
         self.p = null; 
+        self.emit('close');
         if (self.shouldListen) setTimeout(#{ self.listen() }, 3000);
       });
 
-      this.p = new Protocol(socket);
-      this.p.on('message', #(k, message) {
-        self.publish(k, message);
+      socket.on('connect', #{ 
+        self.emit('connect'); 
+        self.p = new Protocol(socket);
+        self.p.on('message', #(k, message) {
+          self.publish(k, message);
+        });
+        self.resubscribe();
       });
     }
   }
 
-  function stop() {
-    this.shouldListen = false;
+  function resubscribe() {
+    for (var channel in this.subscriptions) {
+      if (this.subscriptions[channel].length > 0) { 
+        if (!this.subscribed[channel]) {
+          this.subscribed[channel] = true;
+          this.p.send('subscribe', this.p.escapeData(channel));
+        }
+      }
+    }
+  }
+
+  function end() {
+    this.shouldListen  = false;
+    this.subscribed    = {};
+    this.subscriptions = {};
     try { this.p.abort(); } catch(e) { };
   }
 
@@ -40,7 +67,6 @@ export class Client {
     if (! this.subscriptions[channel]) {
       this.subscriptions[channel] = [];
       this.listen();
-      this.p.send('subscribe', this.p.escapeData(channel));
     }
 
     this.subscriptions[channel].push(handler);

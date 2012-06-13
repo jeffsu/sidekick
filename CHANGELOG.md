@@ -1,7 +1,12 @@
+### 0.0.4
+  
+  * fixing resubscribing problem
+
 ### 0.0.2
   
   * moving over to a tcp protocol
   * setting reconnect in client
+  * adding tests
 
 ### 0.0.1
 
