@@ -16,7 +16,7 @@ export class Protocol {
     chunk = chunk.toString();
     var chunks = chunk.split(/\n/);
 
-    if (chunks.length == 0) return this._data.push(chunk);
+    if (chunks.length == 1) return this._data.push(chunk);
 
     var usedData = false;
     while (chunks.length > 1) {
