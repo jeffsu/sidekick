@@ -1,3 +1,7 @@
+### 0.0.5
+
+  * fixing large payload bug
+
 ### 0.0.4
   
   * fixing resubscribing problem
