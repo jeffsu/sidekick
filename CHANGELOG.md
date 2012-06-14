@@ -1,3 +1,7 @@
+### 0.0.6
+
+  * adding nssocket instead of custom tcp server
+
 ### 0.0.5
 
   * fixing large payload bug
