@@ -31,6 +31,10 @@ var helper = {
     http.get({ host: 'localhost', port: ORIG_PORT, path: path }, function (res) {});
   },
 
+  server: function () {
+    return server;
+  },
+
   client: function () {
     var client = new sidekick.Client('localhost', SD_PORT);
     return client;

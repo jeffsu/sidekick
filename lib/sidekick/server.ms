@@ -1,6 +1,4 @@
-var net = require('net');
-var Protocol = require('./protocol');
-
+var nssocket = require('nssocket');
 export class Server {
   include $m.EventEmitter;
 
@@ -11,45 +9,23 @@ export class Server {
   function initialize() {
     this.pools  = {};
     this.counts = {};
+    this.clientCount = 0;
   }
 
   function publish(channel, data) {
     this.writeToPool(channel, data);
   }
 
-  function app() {
-    var connect = require('connect');
-    var app = connect.createServer();
-    app.use(this.connectSidekick());
-    return app;
-  }
-
   function listen(port, address) {
-    var server = net.createServer(#(socket) {
-      var p = new Protocol(socket);
-      p.on('message', #(key, channel) {
-        if (key == 'subscribe') self.addToPool(p, channel);
+    var server = nssocket.createServer(#(socket) {
+      socket.data(['subscribe'], #(channel) {
+        console.log('subscribing', channel);
+        self.clientCount++;
+        self.addToPool(socket, channel); 
       });
     });
     server.listen(port, address);
     return server;
-  }
-
-  function connectSidekick() {
-    return #(req, res, next) { self.handleSidekick(req, res, next) };
-  }
-
-  function handleSidekick(req, res, next) {
-    var m = null;
-
-    if (m = req.url.match(/^\/subscribe\/([^\/]+)/)) {
-      this.addToPool(req, res, m[1]);
-    }
-    
-    else {
-      next();
-      return;
-    }
   }
 
   function connect() {
@@ -64,7 +40,6 @@ export class Server {
         method:  req.method
       };
 
-      
       var method = req.method;
       if (method == 'POST' || method == 'PUT') {
         var body = [];
@@ -91,14 +66,14 @@ export class Server {
     var pool = this.pools[poolName];
     if (!pool) return;
 
-    var channel = Protocol.escapeChannel(poolName);
-    var payload = Protocol.escapeData(data);
-    for (var key in pool) pool[key].send(channel, payload);
+    for (var key in pool) pool[key].send([ 'message', poolName ], data);
   }
 
-  function addToPool(p, poolName) {
+  function addToPool(socket, poolName) {
     var pools  = this.pools;
     var counts = this.counts;
+    console.log('adding to pool:' + poolName);
+
     if (!counts[poolName]) counts[poolName] = 0;
     if (!pools[poolName])  pools[poolName]  = {};
 
@@ -106,11 +81,13 @@ export class Server {
     counts[poolName]++;
 
     var id = this.getId(pool);
-    pool[id] = p;
+    pool[id] = socket;
 
-    p.on('close', #{
+    socket.on('close', #{
+      self.clientCount--;
       delete pool[id];
-      self.counts[poolName]--;
+      counts[poolName]--;
+      console.log("Client Count (closing):" + self.clientCount);
     });
   }
 
@@ -123,3 +100,39 @@ export class Server {
   }
 
 }
+
+/*
+ * hack to allow for unnecessary json stringifying
+nssocket.NsSocket.prototype.sendJSON = function(event, json, callback) {
+  var data     = json;
+  var dataType = typeof json,
+      message;
+
+  // rebinds
+  if (typeof event === 'string') {
+    event = event.split(this._delimiter);
+  }
+  
+  if (dataType === 'undefined' || dataType === 'function') {
+    callback = data;
+    data = null;
+  }
+
+  // if we aren't connected/socketed, then error
+  if (!this.socket || !this.connected) {
+    return this.emit('error', new Error('NsSocket: sending on a bad socket'));
+  }
+  
+  message = Buffer(event.concat(json) + '\n');
+
+  if (this.socket.cleartext) {
+    this.socket.cleartext.write(message, callback);
+  }
+  else {
+    // now actually write to the socket
+    this.socket.write(message, callback);
+  }
+};
+
+
+ */

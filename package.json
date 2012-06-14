@@ -12,7 +12,8 @@
   "dependencies": { 
     "mochiscript": ">=0.5.3",
     "tempo": "0.0.3",
-    "connect": "2.2.0"
+    "connect": "2.2.0",
+    "nssocket": "0.3.8"
   },
 
   "repository": {
