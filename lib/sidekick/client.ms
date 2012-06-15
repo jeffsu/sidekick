@@ -6,19 +6,27 @@ export class Client {
 
   private {
     var net = require('net');
+    var RETRY_INTERVAL = 2000;
   }
 
   function initialize(host, port) {
     this.host = host;
     this.port = port;
-    this.socket = new nssocket.NsSocket();
-    this.socket.connect(this.port, this.host);
-
-    this.socket.on('error', #{
-      self.emit('error');
+    this.socket = new nssocket.NsSocket({
+      reconnect: true,
+      retryInterval: RETRY_INTERVAL
     });
 
-    this.alreadySubscribed = {};
+    this.socket.on('start', #{
+      self.alreadySubscribed = {};
+      self.emit('start');
+    });
+
+    this.socket.on('error', #{
+      self.emit('error', $1);
+    });
+
+    this.socket.connect(this.port, this.host);
   }
 
   function end() {
