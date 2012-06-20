@@ -33,7 +33,7 @@ export class Server {
   }
 
   function handle(req, res, next) {
-    if (self.counts['sidekick.requests'] > 0) {
+    if (self.hasSubscribers('sidekick.requests')) {
       var data = {
         path:    req.url,
         headers: req.headers,

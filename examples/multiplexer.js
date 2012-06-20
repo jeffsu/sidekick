@@ -53,8 +53,8 @@ client.subscribe('count', function (data) {
 
 // Create proxy to send requests to cloned app
 var proxy = client.proxy('localhost', CLONE_PORT);
-proxy.on('response', function (code, body, headers) {
-  console.log("Proxy: got response.");
+proxy.on('response', function (code, body, headers, meta) {
+  console.log("Proxy: got response in " +  meta.responseTime + 'ms');
   console.log("--------------------------");
 });
 

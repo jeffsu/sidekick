@@ -20,10 +20,15 @@ export class Proxy {
       host:    this.host
     };
 
+    var startTime = (new Date()).getTime();
     var preq = http.request(options, #(pres) {
       var body = [];
+      var meta = {};
       pres.on('data', #{ body.push($1.toString())});
-      pres.on('end',  #{ self.emit('response', pres.statusCode, body.join(''), pres.headers) });
+      pres.on('end',  #{ 
+        meta.responseTime = (new Date()).getTime() - startTime;
+        self.emit('response', pres.statusCode, body.join(''), pres.headers, meta) 
+      });
     });
 
     if (data.method == 'GET' || data.method == 'DELETE') {

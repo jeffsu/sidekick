@@ -1,6 +1,7 @@
 ### 0.0.7
 
   * adding subscriberCount(poolName) to server
+  * adding metadata to proxy (response times)
 
 ### 0.0.6
 
