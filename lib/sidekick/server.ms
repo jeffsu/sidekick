@@ -60,6 +60,11 @@ export class Server {
     return this.counts[poolName];
   }
 
+  function subscriberCount(poolName) {
+    return this.counts[poolName] || 0;
+  }
+
+
   function writeToPool(poolName, data) {
     if (!this.hasSubscribers(poolName)) return;  
 

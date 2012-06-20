@@ -12,6 +12,9 @@ export class Client {
   function initialize(host, port) {
     this.host = host;
     this.port = port;
+
+    this.alreadySubscribed = {};
+
     this.socket = new nssocket.NsSocket({
       reconnect: true,
       retryInterval: RETRY_INTERVAL

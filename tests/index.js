@@ -49,4 +49,4 @@ var helper = {
 
 require('./stop')(helper);
 require('./no-connect')(helper);
-
+require('./subscriber-count')(helper);
