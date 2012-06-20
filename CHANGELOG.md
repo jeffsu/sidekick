@@ -1,3 +1,7 @@
+### 0.0.7
+
+  * adding subscriberCount(poolName) to server
+
 ### 0.0.6
 
   * adding nssocket instead of custom tcp server
